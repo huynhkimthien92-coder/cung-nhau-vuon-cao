@@ -370,7 +370,7 @@
 
   <div class="stage" id="stage"></div>
 
-  <footer> </footer>
+  <footer </footer>
 </div>
 
 <script>
@@ -480,7 +480,7 @@
 
   // === Audio files served alongside this page (GitHub Pages build) ===
   audioFull.src = "full_audio.mp4";
-  audioInstr.src = "instr_audio.mp4";
+  audioInstr.src = "instr_audio.mp3"; // bản chính thức dùng trên sân khấu
 
   let active = audioFull;
 
@@ -567,6 +567,15 @@
   const calibBar = document.getElementById('calibBar');
   const calibStatus = document.getElementById('calibStatus');
   const btnTap = document.getElementById('btnTap');
+
+  // Calibration controls are for setting up the rhythm data, not for
+  // performers to touch. Hidden by default; add ?edit=1 to the link to get
+  // them back (e.g. to fix or extend the rhythm data later) without ever
+  // hand-editing this file again.
+  if (new URLSearchParams(location.search).get('edit') !== '1') {
+    const calibRow = document.querySelector('.calib-row');
+    if (calibRow) calibRow.style.display = 'none';
+  }
 
   function nextCalibLine(fromIdx){
     for (let i = fromIdx; i < cues.length; i++) {
