@@ -1,0 +1,766 @@
+<title>Cùng Nhau Vươn Cao</title>
+<style>
+  :root{
+    --bg:#0f0b0d;
+    --bg2:#1a1214;
+    --ink:#f5ece7;
+    --ink-dim:#8a7a76;
+    --ink-faint:#4a3f3d;
+    --accent:#e0483f;
+    --accent-dim:#7a2a24;
+    --nam:#5b8fd6;
+    --nu:#e0669e;
+    --choir:#e8b23c;
+    --instr:#6b5f5c;
+    --panel:#1f1618;
+    --panel-line:#3a2b2a;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#faf6f4;
+      --bg2:#f0e8e4;
+      --ink:#2a1f1d;
+      --ink-dim:#8a7a76;
+      --ink-faint:#c9bcb8;
+      --accent:#c23b32;
+      --accent-dim:#f3d9d6;
+      --panel:#ffffff;
+      --panel-line:#e8dcd8;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#faf6f4;
+    --bg2:#f0e8e4;
+    --ink:#2a1f1d;
+    --ink-dim:#8a7a76;
+    --ink-faint:#c9bcb8;
+    --accent:#c23b32;
+    --accent-dim:#f3d9d6;
+    --panel:#ffffff;
+    --panel-line:#e8dcd8;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+    padding-inline:16px;
+    padding-block:20px;
+    min-height:100%;
+    display:flex;
+    justify-content:center;
+  }
+  .app{
+    width:100%;
+    max-width:640px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  header{
+    text-align:center;
+    padding-block:6px 2px;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  h1{
+    font-family:'Oswald', 'Be Vietnam Pro', sans-serif;
+    font-size:clamp(26px,6vw,34px);
+    font-weight:700;
+    letter-spacing:0.01em;
+    margin:4px 0 0;
+    text-wrap:balance;
+  }
+  .sub{
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-top:4px;
+  }
+
+  .player{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .track-toggle{
+    display:flex;
+    gap:8px;
+  }
+  .track-toggle button{
+    flex:1;
+    padding:9px 8px;
+    border-radius:10px;
+    border:1px solid var(--panel-line);
+    background:transparent;
+    color:var(--ink-dim);
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .track-toggle button.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  audio{
+    width:100%;
+    accent-color:var(--accent);
+  }
+  .time-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--ink-faint);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .stage{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    height:min(56vh, 480px);
+    overflow-y:auto;
+    scroll-behavior:smooth;
+    position:relative;
+    padding:24px 18px;
+  }
+  .stage::before, .stage::after{
+    content:"";
+    position:sticky;
+    display:block;
+    height:0;
+    z-index:2;
+    pointer-events:none;
+  }
+  .line-row{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:12px 4px;
+    text-align:center;
+    opacity:0.38;
+    transform:scale(0.94);
+    transition:opacity .25s, transform .25s, color .25s;
+  }
+  .line-row .tag{
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    padding:2px 9px;
+    border-radius:99px;
+    margin-bottom:2px;
+  }
+  .tag.nam{background:color-mix(in srgb, var(--nam) 22%, transparent); color:var(--nam);}
+  .tag.nu{background:color-mix(in srgb, var(--nu) 22%, transparent); color:var(--nu);}
+  .tag.choir{background:color-mix(in srgb, var(--choir) 24%, transparent); color:var(--choir);}
+  .tag.instr{background:color-mix(in srgb, var(--instr) 30%, transparent); color:var(--ink-dim);}
+
+  .line-row .vn{
+    font-family:'Oswald', sans-serif;
+    font-size:19px;
+    font-weight:500;
+    line-height:1.3;
+  }
+  .line-row .en{
+    font-size:12px;
+    color:var(--ink-faint);
+    font-style:italic;
+  }
+  .line-row.instrumental .vn{
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-style:italic;
+    font-weight:400;
+    color:var(--ink-dim);
+    font-size:15px;
+  }
+
+  .line-row.active{
+    opacity:1;
+    transform:scale(1);
+  }
+  .line-row.active .vn{
+    font-weight:700;
+    font-size:26px;
+  }
+  .line-row.past{
+    opacity:0.22;
+  }
+
+  .line-row .vn .word{
+    color:var(--ink-faint);
+    transition:color .12s linear;
+  }
+  .line-row.active .vn .word{
+    color:var(--ink-dim);
+  }
+  .line-row.active .vn .word.sung{
+    color:var(--accent);
+  }
+  .line-row.past .vn .word{
+    color:inherit;
+  }
+  .line-row.calibrated .tag::after{
+    content:" ✓";
+  }
+  .line-row.calib-target{
+    outline:2px dashed var(--choir);
+    outline-offset:6px;
+    border-radius:12px;
+  }
+
+  .calib-row{
+    display:flex;
+    gap:8px;
+  }
+  .calib-btn{
+    padding:9px 10px;
+    border-radius:10px;
+    border:1px solid var(--panel-line);
+    background:transparent;
+    color:var(--ink-dim);
+    font-size:12px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+    flex:1;
+  }
+  .calib-btn.active{
+    background:var(--choir);
+    border-color:var(--choir);
+    color:#241a0d;
+  }
+  .calib-btn.reset{
+    flex:0 0 auto;
+  }
+  .calib-bar{
+    display:none;
+    flex-direction:column;
+    gap:8px;
+    font-size:12px;
+    color:var(--ink-dim);
+    background:var(--bg2);
+    border-radius:10px;
+    padding:8px 10px;
+  }
+  .calib-bar.show{ display:flex; }
+  .calib-actions{
+    display:flex;
+    gap:8px;
+  }
+  .calib-mini{
+    border:1px solid var(--panel-line);
+    background:transparent;
+    color:var(--ink-dim);
+    font-size:12px;
+    font-weight:600;
+    font-family:inherit;
+    padding:9px 8px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:1;
+  }
+  #btnTap{
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    flex:1;
+  }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    font-size:11px;
+    color:var(--ink-dim);
+    padding-block:2px 6px;
+  }
+  .legend span{display:flex; align-items:center; gap:5px;}
+  .dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  .dot.nam{background:var(--nam);}
+  .dot.nu{background:var(--nu);}
+  .dot.choir{background:var(--choir);}
+
+  .cuebar{
+    display:flex;
+    height:6px;
+    border-radius:99px;
+    overflow:hidden;
+    background:var(--panel-line);
+  }
+  .cuebar .seg{ height:100%; }
+
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-faint);
+    padding-block:4px 0;
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<div class="app">
+  <header>
+    <div class="eyebrow">70 năm URC · Team Building</div>
+    <h1>Cùng Nhau Vươn Cao</h1>
+    <div class="sub">Tập hát theo nhịp — lời tự chạy sáng theo nhạc</div>
+  </header>
+
+  <div class="player">
+    <div class="track-toggle">
+      <button id="btnFull" class="active">🎤 Bản đầy đủ (có giọng)</button>
+      <button id="btnInstr">🎸 Instrumental</button>
+    </div>
+    <audio id="audioFull" controls preload="metadata"></audio>
+    <audio id="audioInstr" controls preload="metadata" style="display:none"></audio>
+    <div class="cuebar" id="cuebar"></div>
+    <div class="time-row">
+      <span id="tCurrent">0:00</span>
+      <span id="tSection">Intro</span>
+      <span id="tTotal">3:46</span>
+    </div>
+    <div class="calib-row">
+      <button id="btnCalib" class="calib-btn" type="button">🎯 Chỉnh nhịp từng chữ</button>
+      <button id="btnExportCalib" class="calib-btn" type="button">📤 Xuất nhịp</button>
+      <button id="btnResetCalib" class="calib-btn reset" type="button">🗑 Xoá tất cả nhịp</button>
+    </div>
+    <div class="calib-bar" id="exportBar">
+      <span>Nhịp đã ghi chỉ lưu trên máy này. Copy đoạn dưới rồi gửi lại để gắn cố định vào file cho cả nhóm:</span>
+      <textarea id="exportBox" readonly rows="3" style="width:100%;font-size:11px;font-family:monospace;background:var(--panel);color:var(--ink);border:1px solid var(--panel-line);border-radius:8px;padding:6px;"></textarea>
+    </div>
+    <div class="calib-bar" id="calibBar">
+      <span id="calibStatus">Câu có viền chấm vàng là câu đang ghi — bấm SPACE (hoặc nút TAP) đúng lúc mỗi chữ được hát, không phụ thuộc câu nào đang sáng lên</span>
+      <div class="calib-actions">
+        <button id="btnUndoTap" class="calib-mini" type="button">⌫ Bỏ tap cuối</button>
+        <button id="btnRedoLine" class="calib-mini" type="button">↺ Làm lại câu này</button>
+        <button id="btnTap" type="button">TAP</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot nam"></i>Nam</span>
+    <span><i class="dot nu"></i>Nữ</span>
+    <span><i class="dot choir"></i>Đồng ca</span>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <footer>Bấm play rồi theo dõi chữ sáng lên đúng lúc — không cần nhìn giây, chỉ cần nghe và nhìn chữ.</footer>
+</div>
+
+<script>
+(function(){
+  // ===== Cue data: [startSeconds, role, vnText, enText] =====
+  // role: nam | nu | choir | instr
+  const cues = [
+    [0,    'instr', '(Intro — guitar điện + trống)', ''],
+    [28,   'nam',   'Bảy mươi năm đã qua, bao thế hệ nối tiếp', 'Seventy years have passed, generation after generation'],
+    [34.75,'nam',   'Ta hôm nay ngồi đây, chung một mái nhà chung', 'Today we sit together, under one shared roof'],
+    [41.5, 'nam',   'Không phải chuyện ngày xưa, mà là chuyện của chúng ta', "This isn't just history — it's our story"],
+    [48.25,'nam',   'Viết tiếp trang mới, bằng chính đôi tay mình', 'Writing a new page, with our own hands'],
+
+    [55,   'nu',    'Mỗi người một câu chuyện, mỗi người một ước mơ', 'Each of us has a story, each of us has a dream'],
+    [62.25,'nu',    'Gặp nhau nơi đây, cùng chung một hướng đi', 'We meet here, walking the same path'],
+    [69.5, 'nu',    'Khó khăn có là bao, khi vai kề vai bên nhau', 'No hardship is too much, shoulder to shoulder'],
+    [76.75,'nu',    'Niềm tin ta trao nhau, mạnh hơn ngàn lời nói', 'The trust we share speaks louder than words'],
+
+    [84,   'choir', 'Bảy mươi năm — không đi một mình', 'Seventy years — never walking alone'],
+    [88.5, 'choir', 'Bảy mươi năm — có nhau vững tin', 'Seventy years — standing strong together'],
+    [93,   'choir', 'Ta sát vai, cùng nhau tiến bước', 'Side by side, we move forward'],
+    [97.5, 'choir', 'Chúng ta là URC — một đội, một nhà!', 'We are URC — one team, one family!'],
+
+    [102,    'choir', 'Cùng nhau ta vươn cao, cùng nhau ta phát triển!', 'Together we rise, together we grow!'],
+    [106.5,  'choir', 'Không ngại chông gai, không ngại đường xa', 'Unafraid of hardship, unafraid of distance'],
+    [111,    'choir', 'Từng bước ta đi, là từng bước cùng nhau lớn', 'Every step we take, we grow together'],
+    [115.5,  'choir', 'URC hôm nay — là chính chúng ta!', 'URC today — is us!'],
+
+    [120,  'instr', '(Chuyển đoạn — trống đập mạnh)', ''],
+
+    [134,   'nu',   'Dù ngày mai còn bao điều chưa biết trước', 'Though tomorrow holds the unknown'],
+    [137.5, 'nam',  'Có anh, có em, có tất cả nơi đây', 'We have each other, everyone right here'],
+    [141,   'choir','Bàn tay trong tay, không gì là không thể', 'Hand in hand, nothing is impossible'],
+    [144.5, 'choir','Chúng ta cùng nhau — viết tiếp giấc mơ này!', 'Together, we keep writing this dream!'],
+
+    [148,  'instr', '(Guitar solo — cao trào)', ''],
+
+    [167,   'choir', 'Cùng nhau ta vươn cao, cùng nhau ta phát triển!', 'Together we rise, together we grow!'],
+    [171.25,'choir', 'Mỗi ngày lớn hơn, mỗi ngày xa hơn', 'Bigger every day, further every day'],
+    [175.5, 'choir', 'Không phải một người, mà là tất cả chúng ta', 'Not just one — but all of us together'],
+    [179.75,'choir', 'URC ngày mai — rực rỡ hơn hôm nay!', 'URC tomorrow — brighter than today!'],
+
+    [184,   'choir', 'Bảy mươi năm tự hào... vẫn còn đây bên nhau...', 'Seventy years of pride... still here together...'],
+    [195.5, 'choir', 'Chúng ta... URC... cùng nhau vươn xa!', 'We... URC... rising together!'],
+
+    [207,  'choir', 'URC! CÙNG NHAU VƯƠN CAO!', 'URC! TOGETHER WE RISE!'],
+    [211,  'instr', '(Outro — trống + guitar kết thúc)', ''],
+  ];
+
+  const SECTION_LABELS = [
+    [0,'Intro'],[28,'Verse 1'],[55,'Verse 2'],[84,'Pre-chorus'],[102,'Chorus 1'],
+    [120,'Chuyển đoạn'],[134,'Bridge'],[148,'Guitar solo'],[167,'Chorus 2'],
+    [184,'Coda'],[207,'Hô kết'],[211,'Outro']
+  ];
+  const TOTAL_DUR = 226;
+
+  const stage = document.getElementById('stage');
+  const wordSpans = []; // wordSpans[i] = array of .word spans for row i (empty for instrumental rows)
+  const rows = cues.map((c, i) => {
+    const [t, role, vn, en] = c;
+    const row = document.createElement('div');
+    row.className = 'line-row' + (role === 'instr' ? ' instrumental' : '');
+    row.dataset.t = t;
+    const roleLabel = {nam:'Nam', nu:'Nữ', choir:'Đồng ca', instr:''}[role];
+    // split into words, wrap each in a span so we can light them up one by one
+    const vnWords = vn.split(/(\s+)/).map(tok => {
+      if (/^\s+$/.test(tok) || tok === '') return tok;
+      return `<span class="word">${tok}</span>`;
+    }).join('');
+    row.innerHTML =
+      (roleLabel ? `<div class="tag ${role}">${roleLabel}</div>` : '') +
+      `<div class="vn">${vnWords}</div>` +
+      (en ? `<div class="en">${en}</div>` : '');
+    stage.appendChild(row);
+    wordSpans.push(role === 'instr' ? [] : Array.from(row.querySelectorAll('.word')));
+    return row;
+  });
+  // spacer so last line can center-scroll
+  const spacer = document.createElement('div');
+  spacer.style.height = '40vh';
+  stage.appendChild(spacer);
+
+  // cue bar (visual timeline of sections)
+  const cuebar = document.getElementById('cuebar');
+  const segColors = {'nam':'var(--nam)','nu':'var(--nu)','choir':'var(--choir)','instr':'var(--panel-line)'};
+  for (let i = 0; i < SECTION_LABELS.length; i++) {
+    const start = SECTION_LABELS[i][0];
+    const end = i + 1 < SECTION_LABELS.length ? SECTION_LABELS[i+1][0] : TOTAL_DUR;
+    // find dominant role for this section from cues
+    const roleAt = cues.filter(c => c[0] >= start && c[0] < end).map(c => c[1]);
+    const role = roleAt.find(r => r !== 'instr') || 'instr';
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.style.width = ((end - start) / TOTAL_DUR * 100) + '%';
+    seg.style.background = segColors[role];
+    seg.style.opacity = role === 'instr' ? 0.5 : 1;
+    cuebar.appendChild(seg);
+  }
+
+  const audioFull = document.getElementById('audioFull');
+  const audioInstr = document.getElementById('audioInstr');
+  const btnFull = document.getElementById('btnFull');
+  const btnInstr = document.getElementById('btnInstr');
+  const tCurrent = document.getElementById('tCurrent');
+  const tTotal = document.getElementById('tTotal');
+  const tSection = document.getElementById('tSection');
+
+  // === Audio files served alongside this page (GitHub Pages build) ===
+  audioFull.src = "full_audio.mp4";
+  audioInstr.src = "instr_audio.mp4";
+
+  let active = audioFull;
+
+  function fmt(s){
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  }
+
+  function switchTrack(toInstr){
+    const from = toInstr ? audioFull : audioInstr;
+    const to = toInstr ? audioInstr : audioFull;
+    const wasPlaying = !from.paused;
+    const t = from.currentTime;
+    from.pause();
+    from.style.display = 'none';
+    to.style.display = '';
+    to.currentTime = t;
+    if (wasPlaying) to.play().catch(()=>{});
+    active = to;
+    btnFull.classList.toggle('active', !toInstr);
+    btnInstr.classList.toggle('active', toInstr);
+  }
+  btnFull.addEventListener('click', () => { if (active !== audioFull) switchTrack(false); });
+  btnInstr.addEventListener('click', () => { if (active !== audioInstr) switchTrack(true); });
+
+  function currentSectionLabel(t){
+    let label = SECTION_LABELS[0][1];
+    for (const [st, name] of SECTION_LABELS) {
+      if (t >= st) label = name; else break;
+    }
+    return label;
+  }
+
+  // === Per-word rhythm calibration (tap-along), baked in + persisted per browser/device ===
+  // Real tapped timestamps, confirmed by ear against the actual b2 backing track —
+  // shipped with the file so everyone opening the shared link gets the real rhythm
+  // immediately, with no re-calibration needed. { [cueIndex]: [t0, t1, ...] }
+  const DEFAULT_WORD_TIMES = {"1":[28.768212,28.960576,29.212369,29.523865,29.980347,32.134948,32.372174,32.614939,33.028111,33.432128],"2":[35.824548,36.023802,36.244251,36.615003,36.975943,39.150187,39.427402,39.621526,40.00166,40.447011],"3":[42.686234,42.886387,43.139754,43.509033,43.939418,46.060522,46.254727,46.474406,46.802901,47.03009,47.494324],"4":[49.742725,50.060554,50.499706,50.776994,52.234069,52.622358,53.480965,53.976925,54.423454],"5":[56.739814,57.085267,57.286907,57.531424,57.969331,60.277375,60.302131,60.58898,60.840945,61.09422],"6":[63.844552,64.150103,64.4185,64.696592,66.354723,66.741895,67.559052,67.855211,68.366711],"7":[70.829173,71.206387,71.494894,71.762483,71.989072,74.106308,74.331728,74.566265,74.819531,75.214284,75.771809],"8":[77.649552,77.917503,78.14635,78.374468,78.734456,80.284795,80.739563,81.514657,81.894685,82.348987],"9":[85.313191,85.514538,85.766681,86.019404,86.474759,86.836943,87.054371,87.477023],"10":[88.714252,88.941286,89.277165,89.51431,90.094388,90.357809,90.651848,90.979523],"11":[92.199054,92.402322,92.757407,93.446723,93.656985,94.054443,94.466882],"12":[95.214627,95.603673,95.997411,96.428825,96.739547,98.685166,98.912061,99.299731,99.719739],"13":[102.313922,102.51696,102.751314,103.063782,103.349063,103.897116,104.134353,104.359545,104.604489,104.934456],"14":[107.032733,107.445106,107.733059,107.917603,108.515775,108.716699,108.910467,109.240028],"15":[109.770768,109.98255,110.158479,110.420091,110.95011,111.176744,111.387977,111.614497,111.859823,112.070449],"16":[113.097102,113.382477,113.610533,113.836971,114.048153,114.741114,114.958837,115.219909],"18":[134.57205,134.84137,135.069213,135.566418,135.775537,136.004009,136.221439,136.416353,136.634513],"19":[137.340852,137.729263,138.092865,138.326651,138.832218,139.044268,139.254552,139.53188,139.852167],"20":[140.562554,140.78893,141.094311,141.506469,142.189105,142.431144,142.642767,142.862471,143.206431],"21":[143.965209,144.309309,144.714933,145.017164,146.019819,147.18123,147.409014,147.719676,147.922302,148.376807],"23":[166.591689,166.794198,166.997065,167.206474,167.559901,168.25966,168.454601,168.654379,168.882383,169.237152],"24":[170.221426,170.449164,170.776983,171.654472,172.006319,172.234545,172.596834,173.051415],"25":[173.683441,173.884921,174.181345,174.466472,175.022357,175.214216,175.469056,175.693865,176.05672,176.519346],"26":[177.008759,177.211823,177.405006,177.757078,178.288967,179.468816,179.804812,180.562233,180.966234],"27":[184.525259,184.770842,184.979673,185.53606,185.956974,186.175881,186.354393,186.53704,186.857432,187.372417],"28":[187.825231,188.027881,188.248196,190.016713,190.320106,191.170478,191.963121],"29":[206.336036,206.571216,207.076989,207.67438,208.096034]};
+
+  let wordTimes = {};
+  try {
+    const raw = localStorage.getItem('knvc_word_times_v1');
+    if (raw) wordTimes = JSON.parse(raw) || {};
+  } catch(e) { wordTimes = {}; }
+  // seed anything not already overridden locally with the shipped defaults
+  for (const k in DEFAULT_WORD_TIMES) {
+    if (!(k in wordTimes)) wordTimes[k] = DEFAULT_WORD_TIMES[k];
+  }
+  function saveWordTimes(){
+    try { localStorage.setItem('knvc_word_times_v1', JSON.stringify(wordTimes)); } catch(e) {}
+  }
+  function markCalibratedRows(){
+    rows.forEach((r, i) => {
+      r.classList.toggle('calibrated', !!(wordTimes[i] && wordTimes[i].length === wordSpans[i].length && wordSpans[i].length > 0));
+    });
+  }
+  markCalibratedRows();
+
+  // The real, tapped time of a line's first word is a more accurate "line start"
+  // than the original estimated cue timestamp. Once a line is calibrated, use
+  // that instead — otherwise a line whose real singing starts earlier than the
+  // estimate would only become "active" late, by which point several of its
+  // words' recorded timestamps have already passed (looks like it jumps to
+  // mid-line the moment it lights up).
+  function lineStartTime(i){
+    const wt = wordTimes[i];
+    if (wt && wordSpans[i] && wt.length === wordSpans[i].length && wt.length > 0) return wt[0];
+    return cues[i][0];
+  }
+
+  // The line being calibrated is tracked and advanced MANUALLY (calibLineIdx),
+  // independent of the time-based "active" line detection below. This matters
+  // because some cue timestamps are still approximate — if calibration waited
+  // for the row to become "active" by real time, a tap could arrive before the
+  // display catches up and appear to do nothing. Instead: turn calibration on,
+  // it locks onto one target line (marked with a dashed outline) regardless of
+  // playback position, and advances to the next line only once you've tapped
+  // through all its words.
+  let calibrating = false;
+  let calibBuffer = [];
+  let calibLineIdx = -1;
+  const btnCalib = document.getElementById('btnCalib');
+  const btnResetCalib = document.getElementById('btnResetCalib');
+  const calibBar = document.getElementById('calibBar');
+  const calibStatus = document.getElementById('calibStatus');
+  const btnTap = document.getElementById('btnTap');
+
+  function nextCalibLine(fromIdx){
+    for (let i = fromIdx; i < cues.length; i++) {
+      if (wordSpans[i] && wordSpans[i].length) return i;
+    }
+    return -1;
+  }
+
+  function setCalibTarget(i){
+    rows.forEach(r => r.classList.remove('calib-target'));
+    calibLineIdx = i;
+    calibBuffer = [];
+    if (i === -1) {
+      // fully calibrated — auto-exit calibration mode so normal playback
+      // highlighting (which is skipped while calibrating) turns back on
+      calibrating = false;
+      btnCalib.classList.remove('active');
+      calibBar.classList.remove('show');
+      calibStatus.textContent = 'Đã ghi hết toàn bộ các câu có lời 🎉 — bấm play để xem chữ chạy theo nhịp thật';
+      return;
+    }
+    wordSpans[i].forEach(w => w.classList.remove('sung'));
+    rows[i].classList.add('calib-target');
+    rows[i].scrollIntoView({block:'center', behavior:'smooth'});
+    const already = wordTimes[i] && wordTimes[i].length === wordSpans[i].length;
+    calibStatus.textContent = already
+      ? `Câu này đã có nhịp — tap lại để ghi đè (${wordSpans[i].length} chữ)`
+      : `Câu đang chỉnh — ${wordSpans[i].length} chữ, bấm SPACE theo nhịp`;
+  }
+
+  btnCalib.addEventListener('click', () => {
+    calibrating = !calibrating;
+    btnCalib.classList.toggle('active', calibrating);
+    calibBar.classList.toggle('show', calibrating);
+    if (calibrating) {
+      setCalibTarget(nextCalibLine(lastIdx >= 0 ? lastIdx : 0));
+    } else {
+      rows.forEach(r => r.classList.remove('calib-target'));
+      calibLineIdx = -1;
+    }
+  });
+
+  // Calibration data lives only in this browser's localStorage — it never
+  // travels with a shared link. This copies it out (as text, since clipboard
+  // API may also be blocked in a sandboxed iframe) so it can be sent back and
+  // baked permanently into the file for everyone who opens the shared link.
+  const btnExportCalib = document.getElementById('btnExportCalib');
+  const exportBar = document.getElementById('exportBar');
+  const exportBox = document.getElementById('exportBox');
+  btnExportCalib.addEventListener('click', () => {
+    const hasAny = Object.keys(wordTimes).length > 0;
+    exportBox.value = hasAny ? JSON.stringify(wordTimes) : '(chưa ghi nhịp câu nào)';
+    exportBar.classList.toggle('show');
+    if (exportBar.classList.contains('show')) {
+      exportBox.focus();
+      exportBox.select();
+    }
+  });
+
+  // "Xoá tất cả nhịp" needs a second, deliberate click to actually wipe —
+  // no browser confirm() dialog, since Artifacts run sandboxed and that
+  // dialog can be silently blocked (clicking would look like it does nothing).
+  let resetArmed = false;
+  let resetArmTimer = null;
+  const RESET_LABEL_DEFAULT = '🗑 Xoá tất cả nhịp';
+  btnResetCalib.addEventListener('click', () => {
+    if (!resetArmed) {
+      resetArmed = true;
+      btnResetCalib.textContent = '❗ Bấm lần nữa để xoá hết';
+      clearTimeout(resetArmTimer);
+      resetArmTimer = setTimeout(() => {
+        resetArmed = false;
+        btnResetCalib.textContent = RESET_LABEL_DEFAULT;
+      }, 4000);
+      return;
+    }
+    resetArmed = false;
+    clearTimeout(resetArmTimer);
+    btnResetCalib.textContent = RESET_LABEL_DEFAULT;
+    wordTimes = {};
+    saveWordTimes();
+    markCalibratedRows();
+    if (calibrating) setCalibTarget(nextCalibLine(0));
+  });
+
+  function doTap(){
+    if (!calibrating || calibLineIdx === -1) return;
+    const words = wordSpans[calibLineIdx];
+    if (!words || !words.length) return;
+    if (calibBuffer.length >= words.length) return;
+    calibBuffer.push(active.currentTime);
+    words[calibBuffer.length - 1].classList.add('sung');
+    if (calibBuffer.length === words.length) {
+      wordTimes[calibLineIdx] = calibBuffer.slice();
+      saveWordTimes();
+      markCalibratedRows();
+      setCalibTarget(nextCalibLine(calibLineIdx + 1));
+    } else {
+      calibStatus.textContent = `Đã ghi ${calibBuffer.length}/${words.length} chữ`;
+    }
+  }
+  btnTap.addEventListener('click', doTap);
+
+  // Fix a single mistimed tap without redoing the whole line.
+  const btnUndoTap = document.getElementById('btnUndoTap');
+  btnUndoTap.addEventListener('click', () => {
+    if (!calibrating || calibLineIdx === -1 || calibBuffer.length === 0) return;
+    calibBuffer.pop();
+    const words = wordSpans[calibLineIdx];
+    if (words[calibBuffer.length]) words[calibBuffer.length].classList.remove('sung');
+    calibStatus.textContent = `Đã bỏ tap cuối — còn ${calibBuffer.length}/${words.length} chữ, tiếp tục bấm`;
+  });
+
+  // Start this one line over from word 1 (keeps every other line's data).
+  const btnRedoLine = document.getElementById('btnRedoLine');
+  btnRedoLine.addEventListener('click', () => {
+    if (!calibrating || calibLineIdx === -1) return;
+    setCalibTarget(calibLineIdx);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!calibrating) return;
+    if (e.code === 'Space') { e.preventDefault(); doTap(); }
+    else if (e.code === 'Backspace') { e.preventDefault(); btnUndoTap.click(); }
+  });
+
+  // Clicking a row while calibrating jumps calibration to that line too
+  // (in addition to seeking the audio there, wired further below).
+  function maybeRetargetCalibOnClick(i){
+    if (calibrating && wordSpans[i] && wordSpans[i].length) setCalibTarget(i);
+  }
+
+  let lastIdx = -1;
+  function onTime(){
+    const t = active.currentTime;
+    tCurrent.textContent = fmt(t);
+    if (active.duration) tTotal.textContent = fmt(active.duration);
+    tSection.textContent = currentSectionLabel(t);
+
+    let idx = 0;
+    for (let i = 0; i < cues.length; i++) {
+      if (t >= lineStartTime(i)) idx = i; else break;
+    }
+    if (idx !== lastIdx) {
+      if (rows[lastIdx]) {
+        rows[lastIdx].classList.remove('active');
+        // leaving a line: mark all its words as fully sung so it doesn't look half-lit when scrolled away
+        // (skipped only for the exact line currently being tapped, so it never overwrites live tap progress)
+        if (!(calibrating && lastIdx === calibLineIdx)) wordSpans[lastIdx].forEach(w => w.classList.add('sung'));
+      }
+      rows.forEach((r, i) => r.classList.toggle('past', i < idx));
+      rows[idx].classList.add('active');
+      // entering a new line: reset its word highlighting to none-sung-yet
+      if (!(calibrating && idx === calibLineIdx)) wordSpans[idx].forEach(w => w.classList.remove('sung'));
+      rows[idx].scrollIntoView({block:'center', behavior:'smooth'});
+      lastIdx = idx;
+    }
+
+    // word-by-word progress within the active line — skipped only when this
+    // exact line is the one currently being tapped in calibration mode (its
+    // highlighting is driven live by doTap there, not by playback time).
+    // Every other line — calibrated or not — always auto-highlights normally,
+    // regardless of whether calibration mode is toggled on.
+    if (!(calibrating && idx === calibLineIdx)) {
+      const words = wordSpans[idx];
+      if (words.length) {
+        if (wordTimes[idx] && wordTimes[idx].length === words.length) {
+          for (let w = 0; w < words.length; w++) {
+            words[w].classList.toggle('sung', t >= wordTimes[idx][w]);
+          }
+        } else {
+          const lineStart = lineStartTime(idx);
+          const lineEnd = idx + 1 < cues.length ? lineStartTime(idx+1) : lineStart + 5;
+          const dur = Math.max(0.01, lineEnd - lineStart);
+          const progress = Math.min(1, Math.max(0, (t - lineStart) / dur));
+          const currentWordIdx = Math.floor(progress * words.length);
+          for (let w = 0; w < words.length; w++) {
+            words[w].classList.toggle('sung', w < currentWordIdx);
+          }
+        }
+      }
+    }
+  }
+  audioFull.addEventListener('timeupdate', () => { if (active === audioFull) onTime(); });
+  audioInstr.addEventListener('timeupdate', () => { if (active === audioInstr) onTime(); });
+  audioFull.addEventListener('loadedmetadata', () => { if (active===audioFull) tTotal.textContent = fmt(audioFull.duration); });
+  audioInstr.addEventListener('loadedmetadata', () => { if (active===audioInstr) tTotal.textContent = fmt(audioInstr.duration); });
+
+  // clicking a line seeks the active track there (handy for rehearsing one section);
+  // while calibrating, it also retargets calibration to that line.
+  rows.forEach((row, i) => {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', () => {
+      active.currentTime = parseFloat(row.dataset.t);
+      maybeRetargetCalibOnClick(i);
+    });
+  });
+})();
+</script>
